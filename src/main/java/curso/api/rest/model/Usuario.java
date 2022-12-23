@@ -36,7 +36,6 @@ public class Usuario implements UserDetails {
     @Column(unique = true)
     private String login;
 
-
     private String senha;
 
     private String nome;
@@ -56,6 +55,8 @@ public class Usuario implements UserDetails {
                                  referencedColumnName = "id", updatable = false,
                                  table = "role", foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))
     private List<Role> roles;
+
+    private String token = "";
 
     public Usuario() {
         telefones = new ArrayList<>();
@@ -99,6 +100,14 @@ public class Usuario implements UserDetails {
 
     public void setTelefones(List<Telefone> telefones) {
         this.telefones = telefones;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override

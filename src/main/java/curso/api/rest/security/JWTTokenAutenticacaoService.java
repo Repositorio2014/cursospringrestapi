@@ -47,36 +47,70 @@ public class JWTTokenAutenticacaoService {
         /*Adiciona no cabeçalho*/
         response.addHeader(HEADER_STRING, token); /*Authorization: Bearer 8745847847475397593w7w78w*/
 
+        /*Liberando respostas para portas diferentes que usam a API ou caso cliente WEB*/
+        liberacaoCors(response);
+
         /*Escrever Token como resposta*/
         response.getWriter().write("{\"Autorization\": \""+token+"\"}");
 
     }
 
     /*Retorna o usuário validado com o token. Caso não seja válido retorna null*/
-    public Authentication getAuthentication(HttpServletRequest request){
+    public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response){
 
         /*Pega o token enviado no cabeçalho HTTP*/
         String token = request.getHeader(HEADER_STRING);
 
-        if(token != null){
-            /*Faz a validação do token do usuário na requisição*/
-            String user = Jwts.parser().setSigningKey(SECRET)
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody().getSubject();
+        try {
+            if (token != null) {
 
-            if(user != null){
-                Usuario usuario = ApplicationContextLoad.getApplicationContext()
-                        .getBean(UsuarioRepository.class).findUserByLogin(user);
+                String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
 
-                if(usuario != null){
-                    return new UsernamePasswordAuthenticationToken(
-                            usuario.getLogin(),
-                            usuario.getSenha(),
-                            usuario.getAuthorities());
+                /*Faz a validação do token do usuário na requisição*/
+                String user = Jwts.parser().setSigningKey(SECRET)
+                        .parseClaimsJws(tokenLimpo)
+                        .getBody().getSubject();
+
+                if (user != null) {
+                    Usuario usuario = ApplicationContextLoad.getApplicationContext()
+                            .getBean(UsuarioRepository.class).findUserByLogin(user);
+
+                    if (usuario != null) {/*verificação do token do usuário. Verificação opcional*/
+
+                        if (tokenLimpo.equalsIgnoreCase(usuario.getToken())) {
+
+                            return new UsernamePasswordAuthenticationToken(
+                                    usuario.getLogin(),
+                                    usuario.getSenha(),
+                                    usuario.getAuthorities());
+                        }
+                    }
                 }
-            }
+            } /*Fim da condição do token*/
+        }catch (io.jsonwebtoken.ExpiredJwtException e){
+            try {
+                response.getOutputStream().println("Seu token esta expirado. Faca o login e informe um novo token para autenticacao");
+            } catch(IOException e1){}
         }
-            return null; /*Não autorizado*/
+        liberacaoCors(response);
+        return null; /*Não autorizado*/
+    }
+
+    private void liberacaoCors(HttpServletResponse response) {
+
+        if(response.getHeader("Access-Control-Allow-Origin") == null){
+            response.addHeader("Access-Control-Allow-Origin", "*");
+        }
+        if(response.getHeader("Access-Control-Allow-Headers") == null){
+            response.addHeader("Access-Control-Allow-Headers", "*");
+        }
+        if(response.getHeader("Access-Control-Request-Headers") == null){
+            response.addHeader("Access-Control-Request-Headers", "*");
+        }
+        if(response.getHeader("Access-Control-Allow-Methods") == null){
+            response.addHeader("Access-Control-Allow-Methods", "*");
+        }
+
     }
 
 
