@@ -47,6 +47,9 @@ public class JWTTokenAutenticacaoService {
         /*Adiciona no cabeçalho*/
         response.addHeader(HEADER_STRING, token); /*Authorization: Bearer 8745847847475397593w7w78w*/
 
+        ApplicationContextLoad.getApplicationContext()
+                .getBean(UsuarioRepository.class).atualizaTokenUsuario(JWT, userName);
+
         /*Liberando respostas para portas diferentes que usam a API ou caso cliente WEB*/
         liberacaoCors(response);
 

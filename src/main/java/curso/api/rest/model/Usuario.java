@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ public class Usuario implements UserDetails {
 
     private String nome;
 
+    private String cpf;
+
     @OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Telefone> telefones = new ArrayList<>();
 
@@ -57,6 +60,10 @@ public class Usuario implements UserDetails {
     private List<Role> roles;
 
     private String token = "";
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "endereco_id", referencedColumnName = "id")
+    private Endereco endereco;
 
     public Usuario() {
         telefones = new ArrayList<>();
@@ -108,6 +115,30 @@ public class Usuario implements UserDetails {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Endereco getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
     }
 
     @Override

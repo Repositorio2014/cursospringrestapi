@@ -1,6 +1,9 @@
 package curso.api.rest.controller;
 
+import curso.api.rest.dto.UsuarioDTO;
+import curso.api.rest.model.Endereco;
 import curso.api.rest.model.Usuario;
+import curso.api.rest.repository.EnderecoRepository;
 import curso.api.rest.repository.UsuarioRepository;
 import org.hibernate.tool.hbm2ddl.UniqueConstraintSchemaUpdateStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,11 +33,14 @@ public class IndexController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private EnderecoRepository enderecoRepository;
+
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Usuario> init(@PathVariable (value = "id") Long id){
+    public ResponseEntity<UsuarioDTO> init(@PathVariable (value = "id") Long id){
 
         Optional<Usuario> usuario = usuarioRepository.findById(id);
-        return new ResponseEntity<Usuario>(usuario.get(), HttpStatus.OK);
+        return new ResponseEntity<UsuarioDTO>(new UsuarioDTO(usuario.get()), HttpStatus.OK);
     }
 
     @GetMapping(value = "/", produces = "application/json")
@@ -60,6 +64,17 @@ public class IndexController {
         String senhaCriptografada = new BCryptPasswordEncoder().encode(usuario.getSenha());
         usuario.setSenha(senhaCriptografada);
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        Endereco endereco = new Endereco();
+        endereco.setCep(usuarioSalvo.getEndereco().getCep());
+        endereco.setLogradouro(usuario.getEndereco().getLogradouro());
+        endereco.setComplemento(usuario.getEndereco().getComplemento());
+        endereco.setBairro(usuario.getEndereco().getBairro());
+        endereco.setLocalidade(usuario.getEndereco().getLocalidade());
+        endereco.setUf(usuario.getEndereco().getUf());
+        endereco.setUsuario(usuario);
+
+        Endereco enderecoSalvo = enderecoRepository.save(endereco);
 
         return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
     }
