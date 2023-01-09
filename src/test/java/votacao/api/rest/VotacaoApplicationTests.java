@@ -1,10 +1,10 @@
-package curso.api.rest;
+package votacao.api.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CursospringrestapiApplicationTests {
+class VotacaoApplicationTests {
 
     @Test
     void contextLoads() {
